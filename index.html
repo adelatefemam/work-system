@@ -98,13 +98,11 @@ body.locked{overflow:hidden}
 .kg{display:grid;gap:12px;grid-template-columns:repeat(4,1fr);margin-bottom:16px}
 @media(max-width:1000px){.kg{grid-template-columns:repeat(2,1fr)}}
 @media(max-width:560px){.kg{grid-template-columns:1fr}}
-.kc{position:relative;overflow:hidden;min-width:0;border-radius:20px;padding:16px 18px;background:linear-gradient(160deg,rgba(125,23,39,.42),rgba(255,255,255,.025) 72%);border:1px solid rgba(255,255,255,.12);transition:transform .2s,border-color .2s}
+.kc{position:relative;overflow:hidden;min-width:0;border-radius:20px;padding:16px 18px;background:var(--card);border:1px solid var(--line);transition:transform .2s,border-color .2s}
 .kc:hover{transform:translateY(-3px);border-color:rgba(224,54,75,.55)}
-.kc::before{content:"";position:absolute;inset-inline-end:-30px;top:-30px;width:110px;height:110px;border-radius:50%;background:radial-gradient(circle,rgba(224,54,75,.28),transparent 70%);pointer-events:none}
 .kc svg{stroke:currentColor;fill:none;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}
 .kwide{grid-column:span 2}@media(max-width:560px){.kwide{grid-column:auto}}
-.khero{background:linear-gradient(135deg,#7d1727,#3d0b12 85%);border-color:rgba(255,255,255,.2)}
-.khero .kt{color:#f0cfd4}.khero .kn{font-size:46px}
+.khero .kn{font-size:46px}
 .kt{display:flex;align-items:center;gap:10px;color:var(--mut);font-size:13px;position:relative}
 .kt .ico{width:34px;height:34px;border-radius:11px;background:rgba(224,54,75,.2);color:#ff8a98;display:flex;align-items:center;justify-content:center;flex:none}
 .kt .ico svg{width:19px;height:19px}
