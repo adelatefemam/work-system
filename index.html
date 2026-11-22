@@ -93,6 +93,35 @@ body.locked{overflow:hidden}
 .gerr{color:var(--bad);font-size:13px;min-height:18px;margin-top:10px}
 .gcard.shake{animation:shk .3s}
 @keyframes shk{25%{transform:translateX(7px)}50%{transform:translateX(-7px)}75%{transform:translateX(4px)}}
+
+/* ===== C2 cards ===== */
+.kg{display:grid;gap:12px;grid-template-columns:repeat(4,1fr);margin-bottom:16px}
+@media(max-width:1000px){.kg{grid-template-columns:repeat(2,1fr)}}
+@media(max-width:560px){.kg{grid-template-columns:1fr}}
+.kc{position:relative;overflow:hidden;min-width:0;border-radius:20px;padding:16px 18px;background:linear-gradient(160deg,rgba(125,23,39,.42),rgba(255,255,255,.025) 72%);border:1px solid rgba(255,255,255,.12);transition:transform .2s,border-color .2s}
+.kc:hover{transform:translateY(-3px);border-color:rgba(224,54,75,.55)}
+.kc::before{content:"";position:absolute;inset-inline-end:-30px;top:-30px;width:110px;height:110px;border-radius:50%;background:radial-gradient(circle,rgba(224,54,75,.28),transparent 70%);pointer-events:none}
+.kc svg{stroke:currentColor;fill:none;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}
+.kwide{grid-column:span 2}@media(max-width:560px){.kwide{grid-column:auto}}
+.khero{background:linear-gradient(135deg,#7d1727,#3d0b12 85%);border-color:rgba(255,255,255,.2)}
+.khero .kt{color:#f0cfd4}.khero .kn{font-size:46px}
+.kt{display:flex;align-items:center;gap:10px;color:var(--mut);font-size:13px;position:relative}
+.kt .ico{width:34px;height:34px;border-radius:11px;background:rgba(224,54,75,.2);color:#ff8a98;display:flex;align-items:center;justify-content:center;flex:none}
+.kt .ico svg{width:19px;height:19px}
+.kn{font-size:34px;font-weight:700;line-height:1.1;margin-top:12px;position:relative}
+.kn small{font-size:14px;color:var(--mut);font-weight:400;margin-inline-start:6px}
+.ks{display:flex;gap:6px;flex-wrap:wrap;margin-top:12px;position:relative}
+.kch{font-size:12px;padding:3px 10px;border-radius:99px;background:rgba(255,255,255,.07);color:var(--mut)}
+.kch b{color:var(--tx);margin-inline-start:4px}
+.kch.ok b{color:var(--ok)}.kch.bad b{color:var(--bad)}.kch.warn b{color:var(--warn)}
+.kseg{display:flex;height:7px;border-radius:9px;overflow:hidden;gap:2px;margin-top:14px;background:rgba(255,255,255,.06);position:relative}
+.kseg i{display:block;height:100%}
+.kspark{display:block;width:100%;height:46px;margin-top:10px;color:#ff8a98;position:relative}
+.kspark path{vector-effect:non-scaling-stroke;stroke-width:2}
+.kspark .a{fill:rgba(255,138,152,.14);stroke:none}
+.kpair{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:12px;position:relative}
+.kpair div{background:rgba(255,255,255,.06);border-radius:12px;padding:8px 12px}
+.kpair b{display:block;font-size:20px}.kpair span{font-size:12px;color:var(--mut)}
 </style>
 </head>
 <body class="locked">
@@ -340,12 +369,22 @@ function incomeCard(){
  return`<div class="card"><h2>الدخل حسب الفترة</h2>
  <div class="tb" style="align-items:flex-end"><div class="date-range-field"><div class="k">من تاريخ</div><input type="date" data-rng="f" value="${esc(rf)}"></div><div class="date-range-field"><div class="k">إلى تاريخ</div><input type="date" data-rng="t" value="${esc(rt)}"></div></div>
  <div class="tb"><button class="btn g" data-rp="m">هذا الشهر</button><button class="btn g" data-rp="3">آخر 3 شهور</button><button class="btn g" data-rp="y">هذه السنة</button><button class="btn g" data-rp="all">كل الفترة</button></div>
- <div class="sg" style="grid-template-columns:repeat(auto-fit,minmax(230px,1fr))">${gsc(0,"إجمالي الدخل في الفترة (ج.م)",fmt(tot),(inR.length+supR.length)+" دفعة مؤكدة")}${gsc(2,"متوسط الدخل الشهري (ج.م)",fmt(tot/ms),"الإجمالي ÷ "+ms+" شهر")}${gsc(1,"من المواقع والمشاريع (ج.م)",fmt(bySrc("site")))}${gsc(3,"تحصيل الدعم المؤكد (ج.م)",fmt(supEGP))}${gsc(3,"تحصيل الدعم المؤكد (دولار)",fmt(supUSD))}</div>
+ <div class="kg">
+ <div class="kc khero kwide">${kt(KI(0),"إجمالي الدخل في الفترة (ج.م)")}<div class="kn">${fmt(tot)}</div><div class="ks">${kch("دفعة مؤكدة",inR.length+supR.length)}</div></div>
+ <div class="kc">${kt(KI(2),"متوسط الدخل الشهري (ج.م)")}<div class="kn">${fmt(tot/ms)}</div><div class="ks">${kch("الإجمالي ÷",ms+" شهر")}</div></div>
+ <div class="kc">${kt(KI(1),"من المواقع والمشاريع (ج.م)")}<div class="kn">${fmt(bySrc("site"))}</div>${kseg([[siteTot,"var(--ac)"],[supConverted,"#ff8a98"]])}<div class="ks">${kch("دعم مؤكد ج.م",fmt(supEGP))}${kch("دعم مؤكد دولار",fmt(supUSD))}</div></div>
+ </div>
  <p class="note">إجمالي دخل الفترة يجمع دفعات المواقع والمشاريع مع دفعات الدعم المؤكدة فقط؛ تُحوّل دفعات الدعم بالدولار إلى الجنيه بسعر الدولار العام في الإعدادات، وتبقى مبالغ الدعم الأصلية ظاهرة حسب العملة. ${rf||rt?"":"من غير فلتر: من أول دفعة لحد النهارده."}${und.n?` <span class="tag t-warn">${und.n} دفعة بدون تاريخ (${fmt(und.amt)} ج.م) مش محسوبة</span>`:""}</p>
  <div class="vh"><span>إجمالي الدخل الشهري (ج.م)</span>${pk[1]?`<span>أعلى شهر: ${pk[0]} — ${fmt(pk[1])}</span>`:""}</div>${vch(rows)}</div>`}
 const GIP=['<rect x="4" y="12" width="4" height="8" rx="1"/><rect x="10" y="7" width="4" height="13" rx="1"/><rect x="16" y="3" width="4" height="17" rx="1"/>','<circle cx="12" cy="12" r="8"/><path d="M4 12h16M12 4c3 3 3 13 0 16M12 4c-3 3-3 13 0 16"/>','<circle cx="12" cy="12" r="8"/><path d="M12 7v5l3 2"/>','<path d="M12 3l8 3v6c0 5-4 8-8 9-4-1-8-4-8-9V6z"/>'];
 const gsc=(i,l,v,sub)=>`<div class="card sc"><div class="ico"><svg viewBox="0 0 24 24" aria-hidden="true">${GIP[i]}</svg></div><div><div class="l">${l}</div><div class="n">${v}</div>${sub?`<div class="l">${sub}</div>`:""}</div></div>`;
 const vch=(rows,cl)=>{const mx=Math.max(1,...rows.map(r=>r[1]));return`<div class="wrap"><div class="vch${cl?" "+cl:""}">${rows.map(r=>`<div class="vc" title="${esc(r[0])}"><span>${r[1]?fmt(r[1]):""}</span><i class="${r[1]&&r[1]===mx?"pk":r[1]?"":"z"}" style="height:${r[1]?Math.max(4,Math.round(r[1]/mx*170)):3}px"></i><span class="lb">${esc(r[0])}</span></div>`).join("")}</div></div>`};
+const KI=i=>`<span class="ico"><svg viewBox="0 0 24 24" aria-hidden="true">${GIP[i]}</svg></span>`;
+const kt=(ic,l)=>`<div class="kt">${ic}<span>${l}</span></div>`;
+const kch=(l,v,c)=>`<span class="kch${c?" "+c:""}">${l}<b>${v}</b></span>`;
+const kseg=parts=>{const t=parts.reduce((z,p)=>z+p[0],0);return`<div class="kseg">${parts.map(([v,c])=>`<i style="width:${t>0?Math.round(v/t*1000)/10:0}%;background:${c}"></i>`).join("")}</div>`};
+const kspark=rows=>{const n=rows.length;if(n<2)return"";const W=200,H=46,mx=Math.max(1,...rows.map(r=>r[1]));const p=rows.map((r,i)=>(W-i*W/(n-1)).toFixed(1)+" "+(H-4-r[1]/mx*(H-10)).toFixed(1));const d="M"+p.join(" L");return`<svg class="kspark" viewBox="0 0 ${W} ${H}" preserveAspectRatio="none" aria-hidden="true"><path class="a" d="${d} L0 ${H} L${W} ${H} Z"/><path d="${d}"/></svg>`};
+function incSeries(){const{items,sup}=payList();const rate=num(S.settings.rate)||50;const ds=[...items.map(x=>x.d),...sup.map(x=>x.d)];if(!ds.length)return[];const today=new Date();today.setHours(0,0,0,0);const st=new Date(Math.min(...ds.map(x=>+x))),ms=Math.max(1,(today.getFullYear()-st.getFullYear())*12+today.getMonth()-st.getMonth()+1),map={},mk=d=>d.getFullYear()+"-"+d.getMonth();items.forEach(x=>{map[mk(x.d)]=(map[mk(x.d)]||0)+x.a});sup.forEach(x=>{map[mk(x.d)]=(map[mk(x.d)]||0)+x.amount*(x.currency==="دولار"?rate:1)});const rows=[];for(let i=Math.max(0,ms-24);i<ms;i++){const dd=new Date(st.getFullYear(),st.getMonth()+i,1);rows.push([i,map[mk(dd)]||0])}return rows}
 function dash(){
   const a=A(),e=a.e,mx=Math.max(1,...a.people.map(p=>p.all));
   const act=a.sites.filter(s=>!isIna(s)),ina=a.sites.filter(isIna);
@@ -355,19 +394,13 @@ function dash(){
   const ico=i=>`<div class="ico"><svg viewBox="0 0 24 24" aria-hidden="true">${IP[i]}</svg></div>`;
   const sc=(i,l,v,u)=>`<div class="card sc">${ico(i)}<div><div class="l">${l}</div><div class="n">${v}${u?`<small>${u}</small>`:""}</div></div></div>`;
   const sm=(i,l,rows)=>`<div class="card sc">${ico(i)}<div><div class="l">${l}</div><div class="n m">${rows.map(([t,v])=>`<span>${v}<small>${t}</small></span>`).join("")}</div></div></div>`;
-  return`<div class="sg">
-  ${sc(0,"إجمالي الدخل (ج.م)",fmt(e.all))}
-  ${sc(1,"المواقع المنفذة",S.clients.length)}
-  ${sc(1,"مواقع نشطة",act.length)}
-  ${sc(1,"مواقع غير نشطة",ina.length)}
-  ${sc(3,"عملاء مميزين",a.people.length)}
-  ${sc(2,"مشاريع إضافية",S.projects.length)}
-  ${sc(2,"إجمالي الخدمات",S.clients.length+S.projects.length)}
-  ${sm(3,"تصنيف العملاء",[["جديد",lv("New")],["منتظم",lv("Regular")],["مميز",lv("VIP")]])}
-  ${sm(0,"المحصل من اشتراكات الدعم",[["ج.م",fmt(a.supEGP)],["دولار",fmt(a.supUSD)]])}
-  ${sm(4,"حالات الاشتراكات",[["نشطة",a.supAct],["قريبة الانتهاء",a.supNear],["منتهية",a.supExp],["موقوفة مؤقتًا",a.supStop],["ملغية",a.supCancel]])}
-  ${sc(5,"شهور اشتراك الدعم (إجمالي)",a.supMs,"شهر")}
-  ${sc(5,"شهور توقف الدعم (إجمالي)",a.supIna,"شهر")}</div>
+  const sr=incSeries(),tS=act.length+ina.length;
+  return`<div class="kg">
+  <div class="kc khero kwide">${kt(ico(0),"إجمالي الدخل (ج.م)")}<div class="kn">${fmt(e.all)}</div>${kspark(sr)}</div>
+  <div class="kc">${kt(ico(1),"المواقع المنفذة")}<div class="kn">${S.clients.length}</div>${kseg([[act.length,"var(--ok)"],[ina.length,"var(--bad)"]])}<div class="ks">${kch("نشطة",act.length,"ok")}${kch("غير نشطة",ina.length,"bad")}</div></div>
+  <div class="kc">${kt(ico(2),"إجمالي الخدمات")}<div class="kn">${S.clients.length+S.projects.length}</div><div class="ks">${kch("مواقع",S.clients.length)}${kch("مشاريع إضافية",S.projects.length)}</div></div>
+  <div class="kc kwide">${kt(ico(3),"عملاء مميزين")}<div class="kn">${a.people.length}</div>${kseg([[lv("New"),"#ff8a98"],[lv("Regular"),"var(--ac)"],[lv("VIP"),"#7d1727"]])}<div class="ks">${kch("جديد",lv("New"))}${kch("منتظم",lv("Regular"))}${kch("مميز",lv("VIP"))}</div></div>
+  <div class="kc kwide">${kt(ico(4),"اشتراكات الدعم")}<div class="kpair"><div><b>${fmt(a.supEGP)}</b><span>المحصل (ج.م)</span></div><div><b>${fmt(a.supUSD)}</b><span>المحصل (دولار)</span></div><div><b>${a.supMs}</b><span>شهور الاشتراك</span></div><div><b>${a.supIna}</b><span>شهور التوقف</span></div></div><div class="ks">${kch("نشطة",a.supAct,"ok")}${kch("قريبة الانتهاء",a.supNear,"warn")}${kch("منتهية",a.supExp,"bad")}${kch("موقوفة",a.supStop)}${kch("ملغية",a.supCancel)}</div></div></div>
   ${incomeCard()}${upcomingCard(a)}
   <div class="card"><h2>${esc(nm("sites"))}</h2><p class="k">غير نشطة (${ina.length})</p>${tl(ina)}<p class="k" style="margin-top:16px">نشطة (${act.length})</p>${tl(act)}</div>
   <div class="card"><h2>${esc(nm("earned"))}</h2><div class="wrap"><table><tr><th>العملة</th><th>مواقع</th><th>مشاريع</th><th>اشتراكات الدعم المحصلة</th><th>الإجمالي</th></tr>
