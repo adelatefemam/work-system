@@ -120,6 +120,30 @@ body.locked{overflow:hidden}
 .kpair{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:12px;position:relative}
 .kpair div{background:rgba(255,255,255,.06);border-radius:12px;padding:8px 12px}
 .kpair b{display:block;font-size:20px}.kpair span{font-size:12px;color:var(--mut)}
+
+/* ===== B2 income + D1 dates ===== */
+.ih{display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap;margin-bottom:14px}
+.ictl{display:flex;gap:10px;align-items:center;flex-wrap:wrap}
+.isg,.itg{display:inline-flex;background:rgba(0,0,0,.3);border:1px solid var(--line);border-radius:14px;padding:3px;gap:2px;flex-wrap:wrap}
+.isg .btn,.itg .btn{background:none;padding:7px 13px;font-size:13px;color:var(--mut);border-radius:10px}
+.isg .btn.on{background:var(--ac);color:#fff}.itg .btn.on{background:rgba(255,255,255,.12);color:var(--tx)}
+.ibig{font-size:44px;font-weight:700;line-height:1.1;margin-top:4px}
+.iarr{width:18px;height:18px;stroke:var(--mut);fill:none;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}
+.d1f{background:rgba(0,0,0,.3);border:1px solid var(--line);border-radius:14px;padding:6px 12px;width:172px;cursor:pointer;transition:border-color .15s}
+.d1f:hover,.d1f:focus-within{border-color:var(--ac)}
+.d1f .k{font-size:10.5px;line-height:1.2;margin:0}
+.d1f .date-control{gap:4px}
+.d1f input[data-date-display]{border:0;background:none;padding:2px 0;font-size:14px;outline:0;box-shadow:none;cursor:pointer}
+.d1f .date-picker-trigger{font-size:0;width:24px;height:24px;padding:0;border:0;border-radius:6px;cursor:pointer;background:transparent url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23ff8a98' stroke-width='1.8' stroke-linecap='round' stroke-linejoin='round'%3E%3Crect x='4' y='5' width='16' height='15' rx='2'/%3E%3Cpath d='M4 10h16M9 3v4M15 3v4'/%3E%3C/svg%3E") center/18px no-repeat}
+.ich{display:flex;gap:6px;overflow-x:auto;padding-top:4px}
+.bc{flex:1;min-width:38px;display:flex;flex-direction:column;align-items:center}
+.bw{height:200px;width:100%;display:flex;flex-direction:column;justify-content:flex-end;align-items:center;gap:5px;border-bottom:1px solid var(--line)}
+.bw i{display:block;width:100%;max-width:64px;border-radius:6px 6px 0 0;background:var(--br);transition:filter .15s}
+.bw i.pk,.bc.hov .bw i{background:var(--ac)}.bw i.z{opacity:.4}
+.bc:hover .bw i{filter:brightness(1.25)}
+.bc .v{font-size:10.5px;opacity:0;transition:opacity .15s;background:rgba(0,0,0,.5);padding:1px 6px;border-radius:6px;white-space:nowrap;color:var(--tx)}
+.bc:hover .v,.bc.hov .v,.bc .v.pk{opacity:1}.bc .v.pk{background:var(--ac)}
+.bc .lb{font-size:10.5px;color:var(--mut);margin-top:6px}
 </style>
 </head>
 <body class="locked">
@@ -219,7 +243,7 @@ const norm=s=>String(s||"").replace(/\s/g,"").toLowerCase();
 const validPaymentDate=s=>{const p=String(s||"").split(/[\/\.\-]/).map(Number),d=pdate(s);return p.length>=3&&p.every(Number.isFinite)&&!!d&&d.getDate()===p[0]&&d.getMonth()+1===p[1]&&d.getFullYear()===p[2]};
 const validateClientProjectPayments=(type,row,methods)=>{const events=type==="clients"?[["full","fullDate","fullMethod","المبلغ كاملًا مقدمًا"],["dep","down","downMethod","المقدم"],["bal","final","finalMethod","الباقي"]]:[["full","fullDate","fullMethod","المبلغ كاملًا مقدمًا"],["postFull","postDate","postMethod","المبلغ كاملًا بعد التسليم"],["dep","down","downMethod","المقدم"],["bal","final","finalMethod","الباقي"]];for(const[amountKey,dateKey,methodKey,label]of events){if(num(row?.[amountKey])<=0)continue;if(!validPaymentDate(row?.[dateKey]))return{ok:false,error:`أدخل تاريخًا صحيحًا للدفع: ${label}`};if(methods.length&&!String(row?.[methodKey]||"").trim())return{ok:false,error:`اختر طريقة الدفع لـ${label} من القائمة`}}return{ok:true}};
  function activateRenewalIfReady(r,y){if(!r||!y||r.cancelled||y.activated||!y.clientApproved)return false;const amount=num(y.amount??y.amt),currency=y.currency||r.currency;if(amount<=0||!CUR.includes(currency)||confirmedFor(r,y.renewal_id)+1e-8<amount)return false;const wanted=pdate(y.period_end||y.targetEnd),current=endOf(r);if(!wanted||current&&wanted<=current)return false;r.end=fd(wanted);y.activated=true;y.activatedAt=y.activatedAt||fd(new Date());return true}
-let S,tab="dash",q="",rf="",rt="";
+let S,tab="dash",q="",rf="",rt="";let incMode="m";
 const KEY="aae_system_v1";
 function save(){try{localStorage.setItem(KEY,JSON.stringify(S))}catch(e){};cloudPush()}
 /* ---------- التخزين السحابي Supabase — مزامنة البيانات عبر كل الأجهزة ----------
@@ -364,16 +388,17 @@ function incomeCard(){
  const rows=[];for(let i=Math.max(0,ms-60);i<ms;i++){const dd=new Date(st.getFullYear(),st.getMonth()+i,1);rows.push([String(dd.getMonth()+1).padStart(2,"0")+"/"+dd.getFullYear(),map[mk(dd.getFullYear(),dd.getMonth())]||0])}
  const mx=Math.max(1,...rows.map(r=>r[1])),pk=rows.reduce((b,r)=>r[1]>b[1]?r:b,["",0]);
  const cd=(k,v,sub)=>`<div class="card"><div class="k">${k}</div><div class="v">${v}</div>${sub?`<div class="k">${sub}</div>`:""}</div>`;
- return`<div class="card"><h2>الدخل حسب الفترة</h2>
- <div class="tb" style="align-items:flex-end"><div class="date-range-field"><div class="k">من تاريخ</div><input type="date" data-rng="f" value="${esc(rf)}"></div><div class="date-range-field"><div class="k">إلى تاريخ</div><input type="date" data-rng="t" value="${esc(rt)}"></div></div>
- <div class="tb"><button class="btn g" data-rp="m">هذا الشهر</button><button class="btn g" data-rp="3">آخر 3 شهور</button><button class="btn g" data-rp="y">هذه السنة</button><button class="btn g" data-rp="all">كل الفترة</button></div>
- <div class="kg">
- <div class="kc khero kwide">${kt(KI(0),"إجمالي الدخل في الفترة (ج.م)")}<div class="kn">${fmt(tot)}</div><div class="ks">${kch("دفعة مؤكدة",inR.length+supR.length)}</div></div>
- <div class="kc">${kt(KI(2),"متوسط الدخل الشهري (ج.م)")}<div class="kn">${fmt(tot/ms)}</div><div class="ks">${kch("الإجمالي ÷",ms+" شهر")}</div></div>
- <div class="kc">${kt(KI(1),"من المواقع والمشاريع (ج.م)")}<div class="kn">${fmt(bySrc("site"))}</div>${kseg([[siteTot,"var(--ac)"],[supConverted,"#ff8a98"]])}<div class="ks">${kch("دعم مؤكد ج.م",fmt(supEGP))}${kch("دعم مؤكد دولار",fmt(supUSD))}</div></div>
- </div>
- <p class="note">إجمالي دخل الفترة يجمع دفعات المواقع والمشاريع مع دفعات الدعم المؤكدة فقط؛ تُحوّل دفعات الدعم بالدولار إلى الجنيه بسعر الدولار العام في الإعدادات، وتبقى مبالغ الدعم الأصلية ظاهرة حسب العملة. ${rf||rt?"":"من غير فلتر: من أول دفعة لحد النهارده."}${und.n?` <span class="tag t-warn">${und.n} دفعة بدون تاريخ (${fmt(und.amt)} ج.م) مش محسوبة</span>`:""}</p>
- <div class="vh"><span>إجمالي الدخل الشهري (ج.م)</span>${pk[1]?`<span>أعلى شهر: ${pk[0]} — ${fmt(pk[1])}</span>`:""}</div>${vch(rows)}</div>`}
+ const n0=new Date(),iso=d=>d.getFullYear()+"-"+String(d.getMonth()+1).padStart(2,"0")+"-"+String(d.getDate()).padStart(2,"0");
+ const pa=!rf&&!rt?"all":rt===iso(n0)?(rf===iso(new Date(n0.getFullYear(),n0.getMonth(),1))?"m":rf===iso(new Date(n0.getFullYear(),n0.getMonth()-2,1))?"3":rf===iso(new Date(n0.getFullYear(),0,1))?"y":""):"";
+ const pb=(k,l)=>`<button class="btn g${pa===k?" on":""}" data-rp="${k}">${l}</button>`;
+ let cum=0;const VV=rows.map(r=>incMode==="c"?(cum+=r[1]):r[1]),mxv=Math.max(1,...VV);
+ const cols=rows.map((r,i)=>`<div class="bc" data-lb="${esc(r[0])}" data-v="${fmt(VV[i])}" data-p="${tot?(r[1]/tot*100).toFixed(1):0}" data-cp="${tot?(VV[i]/tot*100).toFixed(0):0}" data-up="${r[1]>=tot/ms?1:0}"><div class="bw"><span class="v${incMode==="m"&&r[1]&&r[1]===mx?" pk":""}">${VV[i]?fmt(VV[i]):""}</span><i class="${incMode==="m"&&r[1]&&r[1]===mx?"pk":VV[i]?"":"z"}" style="height:${VV[i]?Math.max(4,Math.round(VV[i]/mxv*170)):3}px"></i></div><span class="lb">${esc(r[0])}</span></div>`).join("");
+ return`<div class="card"><div class="ih"><h2>الدخل حسب الفترة</h2><div class="ictl"><div class="isg">${pb("m","الشهر")}${pb("3","3 شهور")}${pb("y","السنة")}${pb("all","الكل")}</div>
+ <div class="d1f"><div class="k">من تاريخ</div><input type="date" data-rng="f" value="${esc(rf)}"></div><svg class="iarr" viewBox="0 0 24 24" aria-hidden="true"><path d="M19 12H5M11 6l-6 6 6 6"/></svg><div class="d1f"><div class="k">إلى تاريخ</div><input type="date" data-rng="t" value="${esc(rt)}"></div></div></div>
+ <div class="ih" style="align-items:flex-end"><div><div class="k" id="ik">إجمالي الدخل في الفترة (ج.م)</div><div class="ibig" id="in">${fmt(tot)}</div><div class="ks" id="is">${kch("دفعة مؤكدة",inR.length+supR.length)}${kch("متوسط شهري",fmt(tot/ms))}${kch("المدة",ms+" شهر")}${pk[1]?kch("أعلى شهر",pk[0]+" — "+fmt(pk[1])):""}${kch("مواقع ومشاريع",fmt(bySrc("site")))}${kch("دعم مؤكد ج.م",fmt(supEGP))}${kch("دعم مؤكد دولار",fmt(supUSD))}</div></div>
+ <div class="itg"><button class="btn${incMode==="m"?" on":""}" data-im="m">شهري</button><button class="btn${incMode==="c"?" on":""}" data-im="c">تراكمي</button></div></div>
+ <div class="ich">${cols}</div>
+ <p class="note">إجمالي دخل الفترة يجمع دفعات المواقع والمشاريع مع دفعات الدعم المؤكدة فقط؛ تُحوّل دفعات الدعم بالدولار إلى الجنيه بسعر الدولار العام في الإعدادات، وتبقى مبالغ الدعم الأصلية ظاهرة حسب العملة. ${rf||rt?"":"من غير فلتر: من أول دفعة لحد النهارده."}${und.n?` <span class="tag t-warn">${und.n} دفعة بدون تاريخ (${fmt(und.amt)} ج.م) مش محسوبة</span>`:""}</p></div>`}
 const GIP=['<rect x="4" y="12" width="4" height="8" rx="1"/><rect x="10" y="7" width="4" height="13" rx="1"/><rect x="16" y="3" width="4" height="17" rx="1"/>','<circle cx="12" cy="12" r="8"/><path d="M4 12h16M12 4c3 3 3 13 0 16M12 4c-3 3-3 13 0 16"/>','<circle cx="12" cy="12" r="8"/><path d="M12 7v5l3 2"/>','<path d="M12 3l8 3v6c0 5-4 8-8 9-4-1-8-4-8-9V6z"/>'];
 const gsc=(i,l,v,sub)=>`<div class="card sc"><div class="ico"><svg viewBox="0 0 24 24" aria-hidden="true">${GIP[i]}</svg></div><div><div class="l">${l}</div><div class="n">${v}</div>${sub?`<div class="l">${sub}</div>`:""}</div></div>`;
 const vch=(rows,cl)=>{const mx=Math.max(1,...rows.map(r=>r[1]));return`<div class="wrap"><div class="vch${cl?" "+cl:""}">${rows.map(r=>`<div class="vc" title="${esc(r[0])}"><span>${r[1]?fmt(r[1]):""}</span><i class="${r[1]&&r[1]===mx?"pk":r[1]?"":"z"}" style="height:${r[1]?Math.max(4,Math.round(r[1]/mx*170)):3}px"></i><span class="lb">${esc(r[0])}</span></div>`).join("")}</div></div>`};
@@ -648,6 +673,16 @@ if($out)$out.onclick=async()=>{try{localStorage.removeItem("wk_last")}catch(e){}
   $gate.classList.add("need");$gpw.focus();
 })();
 
+
+const ivShow=b=>{const k=document.getElementById("ik"),n=document.getElementById("in"),p=document.getElementById("is");if(!n)return;if(n.dataset.d===undefined){n.dataset.d=n.textContent;k.dataset.d=k.textContent;p.dataset.d=p.innerHTML}
+ k.textContent=b.dataset.lb+(incMode==="c"?" — تراكمي حتى هذا الشهر":"");n.textContent=b.dataset.v;
+ p.innerHTML=incMode==="m"?kch("نسبته من الإجمالي",b.dataset.p+"%")+kch("مقارنة بالمتوسط",b.dataset.up==="1"?"فوق":"تحت"):kch("من الإجمالي",b.dataset.cp+"%");
+ document.querySelectorAll(".ich .bc.hov").forEach(x=>x.classList.remove("hov"));b.classList.add("hov")};
+const ivReset=()=>{const k=document.getElementById("ik"),n=document.getElementById("in"),p=document.getElementById("is");if(!n||n.dataset.d===undefined)return;k.textContent=k.dataset.d;p.innerHTML=p.dataset.d;n.textContent=n.dataset.d;delete n.dataset.d;document.querySelectorAll(".ich .bc.hov").forEach(x=>x.classList.remove("hov"))};
+document.addEventListener("mouseover",e=>{const b=e.target.closest?.(".ich .bc");if(b)ivShow(b);else ivReset()});
+document.addEventListener("click",e=>{const t=e.target;if(!t.closest)return;const m=t.closest("[data-im]");if(m){incMode=m.dataset.im;render();return}
+ const b=t.closest(".ich .bc");if(b){ivShow(b);return}
+ const f=t.closest(".d1f");if(f&&!t.closest(".date-picker-trigger,.date-picker-native")){const p=f.querySelector(".date-picker-native");if(p){try{p.showPicker()}catch{p.focus();p.click()}}}});
 </script>
 </body>
 </html>
