@@ -18,6 +18,8 @@
 body{margin:0;min-height:100%;font-family:Almarai,"Segoe UI",Tahoma,system-ui,sans-serif;color:var(--tx);padding:calc(76px + env(safe-area-inset-top,0px)) 0 env(safe-area-inset-bottom,0)}
 header{position:fixed;top:0;left:0;right:0;width:100%;z-index:20;height:calc(76px + env(safe-area-inset-top,0px));display:flex;align-items:center;justify-content:space-between;padding:env(safe-area-inset-top,0px) 24px 0;border-radius:0;border-bottom:1px solid var(--line);background:radial-gradient(circle at 50% 0%,rgba(224,54,75,.22),transparent 60%),rgba(10,4,5,.82);backdrop-filter:blur(14px)}
 #out{margin-inline-start:auto}
+.syncst{font-size:12.5px;padding:6px 12px;border-radius:99px;border:1px solid var(--line);background:rgba(255,255,255,.06);color:var(--mut);white-space:nowrap;margin-inline-start:auto}.syncst+#out{margin-inline-start:8px}.syncst.ok{color:var(--ok)}.syncst.busy{color:var(--warn)}.syncst.bad{color:#fff;background:#b3263a;border-color:#e5484d}@media(max-width:560px){.syncst{font-size:11.5px;padding:5px 9px}}
+.snapb{position:fixed;left:50%;transform:translateX(-50%);bottom:calc(14px + env(safe-area-inset-bottom,0px));z-index:40;max-width:92vw;background:#7d1727;color:#fff;border:1px solid rgba(255,255,255,.25);border-radius:14px;padding:9px 16px;font-size:13px;box-shadow:0 8px 24px rgba(0,0,0,.5);text-align:center}
 header img{position:absolute;left:50%;top:calc(50% + env(safe-area-inset-top,0px)/2);transform:translate(-50%,-50%);height:50px;max-width:46%;object-fit:contain}
 .hb{height:44px;min-width:44px;padding:0 14px;border-radius:14px;border:1px solid var(--line);background:rgba(255,255,255,.06);color:var(--tx);font:inherit;cursor:pointer;display:flex;align-items:center;gap:6px;justify-content:center}
 .hb:hover{background:rgba(255,255,255,.12)}
@@ -165,11 +167,13 @@ body.locked{overflow:hidden}
 <dialog id="dlg"><form id="frm" method="dialog"></form></dialog>
 <input type="file" id="file" hidden><input type="file" id="logof" accept="image/*" hidden>
 <script>
+/* نسخة محفوظة (Snapshot): لو الملف اتصدّر بالبيانات يشتغل مستقل بدون Supabase */
+const SNAP=window.__SNAPSHOT__||null;
 /* ---------- إعداد Supabase ---------- */
 // رابط المشروع + المفتاح القابل للنشر (publishable — مصمم للظهور في المتصفح؛ الحماية الفعلية من سياسات RLS في قاعدة البيانات)
 const SUPABASE_URL="https://flberdmnaislxftqdtur.supabase.co"; // رابط المشروع — من: Supabase → Settings → API → Project URL
 const SUPABASE_PUBLISHABLE_KEY="sb_publishable_B9edcumRD0TW41IzalvGNA_G5rA_L9u";
-const sb=(window.supabase&&SUPABASE_URL)?window.supabase.createClient(SUPABASE_URL,SUPABASE_PUBLISHABLE_KEY,{auth:{persistSession:true,autoRefreshToken:true,detectSessionInUrl:false}}):null;
+const sb=(!SNAP&&window.supabase&&SUPABASE_URL)?window.supabase.createClient(SUPABASE_URL,SUPABASE_PUBLISHABLE_KEY,{auth:{persistSession:true,autoRefreshToken:true,detectSessionInUrl:false}}):null;
 const SEED={"clients":[{"id":"C001","name":"Client 001","brand":"Store 001","start":"11/9/2025","end":"28/11/2025","service":"إعادة تصميم","notes":"","phone":"","website":"","instagram":"","tiktok":"","facebook":"","down":"11/9/2025","dep":2000.0,"final":"28/11/2025","bal":2000.0,"cur":"ج.م","country":"مصر","source":"Sample Source","rating":"5 = ممتاز","behavior":"ملتزم","notes2":"","shopAff":"لا","theme":"Horizon (Shopify)","tfAff":"لا"},{"id":"C002","name":"Client 001","brand":"Store 002","start":"11/9/2025","end":"28/11/2025","service":"إعادة تصميم","notes":"","phone":"","website":"","instagram":"","tiktok":"","facebook":"","down":"11/9/2025","dep":2000.0,"final":"28/11/2025","bal":2000.0,"cur":"ج.م","country":"مصر","source":"Sample Source","rating":"5 = ممتاز","behavior":"ملتزم","notes2":"","shopAff":"لا","theme":"Horizon (Shopify)","tfAff":"لا"},{"id":"C003","name":"Client 002","brand":"Store 003","start":"26/12/2025","end":"27/12/2025","service":"إعادة تصميم","notes":"","phone":"","website":"","instagram":"","tiktok":"","facebook":"","down":"26/12/2025","dep":2500.0,"final":"27/12/2025","bal":2500.0,"cur":"ج.م","country":"مصر","source":"Sample Source","rating":"5 = ممتاز","behavior":"ملتزم","notes2":"","shopAff":"لا","theme":"Horizon (Shopify)","tfAff":"لا"},{"id":"C004","name":"Client 003","brand":"Store 004","start":"1/11/2026","end":"1/12/2026","service":"تنفيذ كامل","notes":"","phone":"","website":"","instagram":"","tiktok":"","facebook":"","down":"1/11/2026","dep":2500.0,"final":"16/1/2026","bal":2500.0,"cur":"ج.م","country":"مصر","source":"Sample Source","rating":"1 = سيء جدًا","behavior":"غير ملتزم","notes2":"","shopAff":"نعم","theme":"Horizon (Shopify)","tfAff":"لا"},{"id":"C005","name":"Client 004","brand":"Store 005","start":"5/5/2026","end":"5/9/2026","service":"إعادة تصميم","notes":"","phone":"","website":"","instagram":"","tiktok":"","facebook":"","down":"5/5/2026","dep":2500.0,"final":"5/9/2026","bal":2500.0,"cur":"ج.م","country":"الكويت","source":"Sample Source","rating":"5 = ممتاز","behavior":"ملتزم","notes2":"","shopAff":"لا","theme":"Horizon (Shopify)","tfAff":"لا"},{"id":"C006","name":"Client 005","brand":"Store 006","start":"7/10/2026","end":"7/12/2026","service":"تنفيذ كامل","notes":"","phone":"","website":"","instagram":"","tiktok":"","facebook":"","down":"7/6/2026","dep":2500.0,"final":"13/7/2026","bal":2500.0,"cur":"ج.م","country":"مصر","source":"Sample Source","rating":"5 = ممتاز","behavior":"ملتزم","notes2":"","shopAff":"نعم","theme":"Horizon (Shopify)","tfAff":"لا"},{"id":"C007","name":"Client 006","brand":"Store 007","start":"16/7/2026","end":"22/7/2026","service":"تنفيذ كامل","notes":"","phone":"","website":"","instagram":"","tiktok":"","facebook":"","down":"15/7/2026","dep":20000.0,"final":"","bal":0.0,"cur":"ج.م","country":"الكويت","source":"Sample Source","rating":"5 = ممتاز","behavior":"ملتزم","notes2":"","shopAff":"نعم","theme":"Minimog (Themeforest)","tfAff":"لا"},{"id":"C008","name":"Client 007","brand":"Store 008","start":"28/7/2026","end":"8/1/2026","service":"تنفيذ كامل","notes":"","phone":"","website":"","instagram":"","tiktok":"","facebook":"","down":"26/7/2026","dep":2500.0,"final":"8/1/2026","bal":5000.0,"cur":"ج.م","country":"مصر","source":"Sample Source","rating":"5 = ممتاز","behavior":"ملتزم","notes2":"","shopAff":"نعم","theme":"Horizon (Shopify)","tfAff":"لا"},{"id":"C009","name":"Client 008","brand":"Store 009","start":"8/6/2026","end":"8/10/2026","service":"إعادة تصميم","notes":"","phone":"","website":"","instagram":"","tiktok":"","facebook":"","down":"8/6/2026","dep":2000.0,"final":"8/10/2026","bal":2000.0,"cur":"ج.م","country":"مصر","source":"Sample Source","rating":"4 = جيد","behavior":"ملتزم","notes2":"","shopAff":"لا","theme":"Horizon (Shopify)","tfAff":"لا"},{"id":"C010","name":"Client 009","brand":"Store 010","start":"26/8/2026","end":"28/8/2026","service":"تنفيذ كامل","notes":"","phone":"","website":"","instagram":"","tiktok":"","facebook":"","down":"25/8/2026","dep":2500.0,"final":"28/8/2026","bal":2500.0,"cur":"ج.م","country":"مصر","source":"Sample Source","rating":"5 = ممتاز","behavior":"ملتزم","notes2":"","shopAff":"نعم","theme":"Horizon (Shopify)","tfAff":"لا"},{"id":"C011","name":"Client 010","brand":"Store 011","start":"20/10/2026","end":"24/10/2026","service":"تنفيذ كامل","notes":"","phone":"","website":"","instagram":"","tiktok":"","facebook":"","down":"20/10/2026","dep":4000.0,"final":"21/10/2026","bal":3000.0,"cur":"ج.م","country":"مصر","source":"Sample Source","rating":"5 = ممتاز","behavior":"ملتزم","notes2":"","shopAff":"نعم","theme":"Horizon (Shopify)","tfAff":"لا"}],"projects":[{"cid":"C002","name":"Client 001","brand":"Store 002","start":"3/5/2026","end":"3/5/2026","desc":"Sample project description","down":"","dep":0.0,"final":"3/5/2026","bal":500.0,"cur":"ج.م"},{"cid":"C004","name":"Client 004","brand":"Store 005","start":"21/3/2026","end":"21/3/2026","desc":"Sample project description","down":"","dep":0.0,"final":"3/5/2026","bal":750.0,"cur":"ج.م"},{"cid":"C002","name":"Client 001","brand":"Store 002","start":"31/5/2026","end":"6/1/2026","desc":"Sample project description","down":"","dep":0.0,"final":"6/1/2026","bal":500.0,"cur":"ج.م"},{"cid":"C002","name":"Client 001","brand":"Store 002","start":"22/6/2026","end":"22/6/2026","desc":"Sample project description","down":"","dep":0.0,"final":"22/6/2026","bal":250.0,"cur":"ج.م"},{"cid":"C004","name":"Client 004","brand":"Store 005","start":"28/7/2026","end":"28/7/2026","desc":"Sample project description","down":"","dep":0.0,"final":"28/7/2026","bal":1500.0,"cur":"ج.م"},{"cid":"C002","name":"Client 001","brand":"Store 002","start":"28/7/2027","end":"28/7/2027","desc":"Sample project description","down":"","dep":0.0,"final":"28/7/2027","bal":500.0,"cur":"ج.م"},{"cid":"C005","name":"Client 005","brand":"Store 006","start":"29/7/2028","end":"8/3/2026","desc":"Sample project description","down":"","dep":0.0,"final":"30/7/2026","bal":1500.0,"cur":"ج.م"},{"cid":"C002","name":"Client 001","brand":"Store 002","start":"8/4/2026","end":"8/4/2026","desc":"Sample project description","down":"","dep":0.0,"final":"8/4/2026","bal":500.0,"cur":"ج.م"},{"cid":"C002","name":"Client 001","brand":"Store 002","start":"13/8/2026","end":"14/8/2026","desc":"Sample project description","down":"","dep":0.0,"final":"14/8/2026","bal":1500.0,"cur":"ج.م"},{"cid":"C008","name":"Client 008","brand":"Store 009","start":"25/8/2026","end":"25/8/2026","desc":"Sample project description","down":"","dep":0.0,"final":"25/8/2026","bal":500.0,"cur":"ج.م"},{"cid":"C007","name":"Client 007","brand":"Store 008","start":"10/9/2026","end":"10/9/2026","desc":"Sample project description","down":"","dep":0.0,"final":"13/10/2026","bal":500.0,"cur":"ج.م"},{"cid":"C008","name":"Client 008","brand":"Store 009","start":"13/10/2026","end":"16/10/2026","desc":"Sample project description","down":"","dep":0.0,"final":"16/10/2026","bal":1000.0,"cur":"ج.م"},{"cid":"C001","name":"Client 001","brand":"Store 001","start":"11/8/2026","end":"11/8/2026","desc":"Sample project description","down":"","dep":0.0,"final":"11/9/2026","bal":2500.0,"cur":"ج.م"}],"support":[],"settings":{"rate":50,"regN":2,"regAmt":7500,"vipN":5,"vipAmt":15000,"title":"Adel Atef Emam","accent":"#e0364b","logo":"","pre":{"clients":"C","support":"S"},"cols":{},"lists":{"service":["تنفيذ كامل","إعادة تصميم","تطوير متجر"],"source":["Sample Source"],"country":["مصر","الكويت"],"pstatus":["مدفوع","معلق","متأخر"],"siteStatus":["نشط","متوقف"],"paymentMethod":[]},"plans":[{"n":"برونزي","f":4000,"d":""},{"n":"فضي","f":8000,"d":""},{"n":"ذهبي","f":12000,"d":""}]}};
 const RATINGS=["1 = سيء جدًا","2 = سيء","3 = متوسط","4 = جيد","5 = ممتاز"],YN=["لا","نعم"],CUR=["ج.م","دولار"];
 const SC={
@@ -187,8 +191,8 @@ phone:'<svg viewBox="0 0 24 24" fill="none" stroke="#3fcf8e" stroke-width="1.8" 
 facebook:'<svg viewBox="0 0 24 24" fill="#1877F2"><path d="M24 12.073c0-6.627-5.373-12-12-12s-12 5.373-12 12c0 5.99 4.388 10.954 10.125 11.854v-8.385H7.078v-3.47h3.047V9.43c0-3.007 1.792-4.669 4.533-4.669 1.312 0 2.686.235 2.686.235v2.953H15.83c-1.491 0-1.956.925-1.956 1.874v2.25h3.328l-.532 3.47h-2.796v8.385C19.612 23.027 24 18.062 24 12.073z"/></svg>'};
 const waNum=(v,country)=>{let d=String(v||"").replace(/[^\d+]/g,"");if(!d)return"";if(d[0]==="+")return d.replace(/\D/g,"");d=d.replace(/\D/g,"");if(d.startsWith("00"))return d.slice(2);const cc={"مصر":"20","الكويت":"965","السعودية":"966","الإمارات":"971"}[String(country||"").trim()]||"20";if(d[0]==="0")return cc+d.slice(1);if(cc==="965"&&d.length===8)return cc+d;return d};
 const opts=o=>typeof o==="string"?(o==="@plan"?(S.settings.plans||[]).map(p=>p.n):(S.settings.lists[o.slice(1)]||[])):o;
-const lab=(t,k)=>k==="egp"?"الإجمالي بالجنيه":k==="total"?"الإجمالي":k==="status"?"الحالة":k==="dstatus"?(t==="projects"?"بيانات المشروع":"بيانات العميل"):k==="links"?"الروابط":k==="sstatus"?"حالة الاشتراك":k==="subMonths"?"شهور الاشتراك":k==="stopMonths"?"شهور التوقف":(SC[t].f.find(x=>x[0]===k)||[,""])[1];
-const pool=t=>[...SC[t].f.map(x=>x[0]).filter(k=>!(t==="clients"&&SOC.includes(k))),"total",...(t!=="support"?["egp"]:[]),...(t==="clients"?["status","links"]:[]),...(t!=="support"?["dstatus"]:[]),...(t==="support"?["subMonths","stopMonths"]:[])];
+const lab=(t,k)=>k==="no"?"#":k==="egp"?"الإجمالي بالجنيه":k==="total"?"الإجمالي":k==="status"?"الحالة":k==="dstatus"?(t==="projects"?"بيانات المشروع":"بيانات العميل"):k==="links"?"الروابط":k==="sstatus"?"حالة الاشتراك":k==="subMonths"?"شهور الاشتراك":k==="stopMonths"?"شهور التوقف":(SC[t].f.find(x=>x[0]===k)||[,""])[1];
+const pool=t=>[...(t==="projects"?["no"]:[]),...SC[t].f.map(x=>x[0]).filter(k=>!(t==="clients"&&SOC.includes(k))),"total",...(t!=="support"?["egp"]:[]),...(t==="clients"?["status","links"]:[]),...(t!=="support"?["dstatus"]:[]),...(t==="support"?["subMonths","stopMonths"]:[])];
 const SOC=["phone","whatsapp","website","instagram","tiktok","facebook"];
 const curCols=t=>{const c=pool(t);return t==="clients"?[...new Set(c.map(k=>SOC.includes(k)?"links":k))]:c};
 const paidWord=()=>(S.settings.lists.pstatus||[])[0]||"مدفوع";
@@ -212,7 +216,7 @@ function fixS(){const d=SEED.settings,s=S.settings||{};
   if(!Array.isArray(r.renewals)){const m=Math.max(0,num(r.months)-1),s0=pdate(r.subStart);r.renewals=Array.from({length:m},(_,i)=>({d:s0?fd(addMonths(s0,i+1)):"",amt:num(r.fee),ps:r.pstatus||"",legacy:1}))}
   if(!r.end){const s0=pdate(r.subStart);if(s0)r.end=fd(addMonths(s0,monthsSub(r)))}
   if(r.pstatus===pw&&(r.paid===undefined||r.paid===null||r.paid===""))r.paid=r.fee||0});
-  S.settings={...d,...s,v:4,lists,pre:{...d.pre,...s.pre},cols:s.cols||{},names:s.names||{},plans:Array.isArray(s.plans)?s.plans:[]};S.support=S.support||[];
+  S.settings={...d,...s,v:4,lists,pre:{...d.pre,...s.pre},cols:s.cols||{},names:s.names||{},plans:Array.isArray(s.plans)?s.plans:[]};S.support=S.support||[];try{sortProjects()}catch(e){}
   const validCur=x=>x==="ج.م"||x==="دولار";
   S.support.forEach(r=>{if(!Array.isArray(r.statusHistory))r.statusHistory=[];if(r.stopped&&r.stopDate&&!r.statusHistory.some(x=>x.to==="paused"&&!x.end))r.statusHistory.push({from:"active",to:"paused",start:r.stopDate,end:"",legacy:true});if(r.stopped&&!r.stopDate&&!r.statusHistory.some(x=>x.to==="paused"&&x.review)){r.statusHistory.push({from:"active",to:"paused",start:"",end:"",legacy:true,review:true});r.statusReview=true;}if(r.cancelled&&!r.cancelledAt)r.statusReview=true;if(r.cancelled&&!r.statusHistory.some(x=>x.to==="cancelled"))r.statusHistory.push({from:"active",to:"cancelled",date:r.cancelledAt||"",legacy:true});if(!r.renewalWorkflowV1){const ys=Array.isArray(r.renewals)?r.renewals:[],known=ys.length>0&&ys.every(y=>!y.legacy&&["مدفوع","معلق","متأخر"].includes(y.ps)&&Number.isFinite(Number(y.amt))),legacy=ys.length>0&&ys.every(y=>y.legacy);if(!ys.length){r.collectionBase=r.pstatus===pw?num(r.paid):0;if(num(r.paid)>0&&r.pstatus!==pw)r.renewalReview=true}else if(known){const paidRenewals=ys.filter(y=>y.ps===pw).reduce((a,y)=>a+num(y.amt),0),base=num(r.paid)-paidRenewals;if(base>=0)r.collectionBase=base;else{r.collectionBase=0;r.renewalReview=true}if(ys.some(y=>y.ps!==pw||y.clientApproved===undefined))r.renewalReview=true}else if(legacy){r.collectionBase=r.pstatus===pw?num(r.paid):0;r.renewalReview=true}else{r.collectionBase=0;r.renewalReview=true}r.renewalWorkflowV1=1}if(!validCur(r.currency)){const c=supportClient(r);if(c&&validCur(c.cur)){r.currency=c.cur;delete r.currencyReview}else r.currencyReview=true}else delete r.currencyReview});
    S.settings.plans.forEach(p=>{if(!p.plan_id)p.plan_id=newStableId();if(!validCur(p.currency)){const linked=S.support.filter(r=>r.plan===p.n).map(r=>r.currency).filter(validCur),unique=[...new Set(linked)];if(linked.length&&unique.length===1&&S.support.filter(r=>r.plan===p.n).every(r=>validCur(r.currency))){p.currency=unique[0];delete p.currencyReview}else p.currencyReview=true}else delete p.currencyReview});
@@ -244,35 +248,57 @@ const validPaymentDate=s=>{const p=String(s||"").split(/[\/\.\-]/).map(Number),d
 const validateClientProjectPayments=(type,row,methods)=>{const events=type==="clients"?[["full","fullDate","fullMethod","المبلغ كاملًا مقدمًا"],["dep","down","downMethod","المقدم"],["bal","final","finalMethod","الباقي"]]:[["full","fullDate","fullMethod","المبلغ كاملًا مقدمًا"],["postFull","postDate","postMethod","المبلغ كاملًا بعد التسليم"],["dep","down","downMethod","المقدم"],["bal","final","finalMethod","الباقي"]];for(const[amountKey,dateKey,methodKey,label]of events){if(num(row?.[amountKey])<=0)continue;if(!validPaymentDate(row?.[dateKey]))return{ok:false,error:`أدخل تاريخًا صحيحًا للدفع: ${label}`};if(methods.length&&!String(row?.[methodKey]||"").trim())return{ok:false,error:`اختر طريقة الدفع لـ${label} من القائمة`}}return{ok:true}};
  function activateRenewalIfReady(r,y){if(!r||!y||r.cancelled||y.activated||!y.clientApproved)return false;const amount=num(y.amount??y.amt),currency=y.currency||r.currency;if(amount<=0||!CUR.includes(currency)||confirmedFor(r,y.renewal_id)+1e-8<amount)return false;const wanted=pdate(y.period_end||y.targetEnd),current=endOf(r);if(!wanted||current&&wanted<=current)return false;r.end=fd(wanted);y.activated=true;y.activatedAt=y.activatedAt||fd(new Date());return true}
 let S,tab="dash",q="",rf="",rt="";let incMode="m";
-const KEY="aae_system_v1";
+const KEY=SNAP?"aae_snapshot_"+String(SNAP.at).replace(/\W/g,""):"aae_system_v1";
 function save(){try{localStorage.setItem(KEY,JSON.stringify(S))}catch(e){};cloudPush()}
+const DKEY=KEY+"_dirty",SKEY=KEY+"_stamp";
+function lsGet(k){try{return localStorage.getItem(k)}catch(e){return null}}function lsSet(k,v){try{v==null?localStorage.removeItem(k):localStorage.setItem(k,v)}catch(e){}}
 /* ---------- التخزين السحابي Supabase — مزامنة البيانات عبر كل الأجهزة ----------
    جدول واحد app_data لكل مستخدم (owner_id) يحمل حالة النظام كاملة كـ JSON.
    عند الدخول: تُحمَّل بيانات السحابة إن وُجدت (السحابة هي المرجع)،
    وإن لم توجد (أول مرة لهذا المستخدم) تُرفَع بيانات الجهاز الحالي كبذر أولي.
    كل تعديل: يُحفظ محليًا فورًا ثم يُرفع للسحابة بعد تهدئة 1.2 ثانية. */
 let cloudUid=null,cloudEmail="",cloudTimer=null,cloudStamp=null,cloudDirty=false;
+function syncBadge(st,txt){let b=document.getElementById("syncst");if(!b){b=document.createElement("span");b.id="syncst";const h=document.getElementById("out");if(h&&h.parentNode)h.parentNode.insertBefore(b,h);else return}b.className="syncst "+st;b.textContent=txt;b.title=txt}
 function cloudMsg(t,bad){if($out){$out.title="تسجيل الخروج ("+cloudEmail+") — "+t;$out.style.outline=bad?"2px solid #e5484d":""}}
-function cloudPush(){
+function snapBanner(){if(document.getElementById("snapb"))return;const d=document.createElement("div");d.id="snapb";d.className="snapb";d.textContent="نسخة محفوظة بتاريخ "+SNAP.at+" — مستقلة تمامًا ولا تتزامن مع Supabase (التعديلات بتتحفظ في المتصفح ده بس)";document.body.appendChild(d)}
+function cloudPush(now){
   if(!sb||!cloudUid)return;
-  cloudDirty=true;
+  cloudDirty=true;lsSet(DKEY,"1");syncBadge("busy","… جاري الحفظ");
   clearTimeout(cloudTimer);
-  cloudTimer=setTimeout(async()=>{
-    if(!sb||!cloudUid||!S)return;
-    try{
-      const{data,error}=await sb.from("app_data").upsert({owner_id:cloudUid,data:JSON.parse(JSON.stringify(S)),updated_at:new Date().toISOString()},{onConflict:"owner_id"}).select("updated_at").single();
-      if(error)throw error;
-      cloudStamp=data.updated_at;cloudDirty=false;
-      cloudMsg("✓ تم حفظ التعديلات سحابيًا "+new Date().toLocaleTimeString("ar-EG"));
-    }catch(e){console.warn("Supabase save failed:",e);alert("⚠ تعذر الحفظ السحابي: "+(e.message||e)+"\nالبيانات محفوظة على هذا الجهاز فقط ولن تظهر على أجهزة أخرى.");cloudMsg("⚠ تعذر الحفظ السحابي",true)}
-  },1200);
+  cloudTimer=setTimeout(cloudFlush,now?0:1200);
 }
+async function cloudFlush(){
+  clearTimeout(cloudTimer);cloudTimer=null;
+  if(!sb||!cloudUid||!S||!cloudDirty)return;
+  if(cloudSaving){cloudAgain=true;return}
+  cloudSaving=true;cloudAgain=false;
+  try{
+    const{data,error}=await sb.from("app_data").upsert({owner_id:cloudUid,data:JSON.parse(JSON.stringify(S)),updated_at:new Date().toISOString()},{onConflict:"owner_id"}).select("updated_at").single();
+    if(error)throw error;
+    cloudStamp=data.updated_at;lsSet(SKEY,cloudStamp);
+    if(!cloudAgain){cloudDirty=false;lsSet(DKEY,null);syncBadge("ok","✓ متزامن "+new Date().toLocaleTimeString("ar-EG",{hour:"2-digit",minute:"2-digit"}));cloudMsg("✓ تم حفظ التعديلات سحابيًا "+new Date().toLocaleTimeString("ar-EG"))}
+  }catch(e){console.warn("Supabase save failed:",e);syncBadge("bad","⚠ لم يُحفظ سحابيًا");cloudMsg("⚠ تعذر الحفظ السحابي",true);if(!cloudWarned){cloudWarned=true;alert("⚠ تعذر الحفظ السحابي: "+(e.message||e)+"\nالبيانات محفوظة على هذا الجهاز وهيتعاد رفعها تلقائيًا أول ما الاتصال يرجع.")}}
+  finally{cloudSaving=false;if(cloudAgain&&cloudDirty)cloudTimer=setTimeout(cloudFlush,300)}
+}
+let cloudSaving=false,cloudAgain=false,cloudWarned=false;
+setInterval(()=>{if(cloudDirty&&!cloudTimer&&!cloudSaving&&cloudUid)cloudFlush()},15000);
+document.addEventListener("visibilitychange",()=>{if(document.visibilityState==="hidden"&&cloudDirty)cloudFlush()});
+window.addEventListener("pagehide",()=>{if(cloudDirty)cloudFlush()});
+window.addEventListener("online",()=>{if(cloudDirty)cloudFlush()});
 async function cloudLoad(){
   if(!sb||!cloudUid)return;
   try{
     const{data,error}=await sb.from("app_data").select("data,updated_at").eq("owner_id",cloudUid).maybeSingle();
     if(error)throw error;
-    if(data&&data.data&&typeof data.data==="object"&&data.data.clients){S=data.data;cloudStamp=data.updated_at}
+    if(data&&data.data&&typeof data.data==="object"&&data.data.clients){
+      const unsynced=lsGet(DKEY)==="1"&&S&&S.clients,knownStamp=lsGet(SKEY);
+      if(unsynced){
+        const cloudNewer=knownStamp&&Date.parse(data.updated_at)>Date.parse(knownStamp);
+        if(!cloudNewer||confirm("في تعديلات على الجهاز ده ما اترفعتش للسحابة، وفي نفس الوقت السحابة اتعدّلت من جهاز تاني.\n\nموافق = ارفع تعديلات الجهاز ده (وتكتب فوق السحابة)\nإلغاء = خد نسخة السحابة (وتتمسح تعديلات الجهاز ده)")){cloudStamp=data.updated_at;cloudDirty=true;syncBadge("busy","… جاري الحفظ");cloudTimer=setTimeout(cloudFlush,200)}
+        else{S=data.data;cloudStamp=data.updated_at;lsSet(SKEY,cloudStamp);lsSet(DKEY,null)}
+      }else{S=data.data;cloudStamp=data.updated_at;lsSet(SKEY,cloudStamp)}
+      if(!unsynced)syncBadge("ok","✓ متزامن")
+    }
     else{await sb.from("app_data").upsert({owner_id:cloudUid,data:JSON.parse(JSON.stringify(S)),updated_at:new Date().toISOString()},{onConflict:"owner_id"});if($out)$out.title="تسجيل الخروج ("+cloudEmail+") — ✓ تم رفع بياناتك إلى السحابة"}
   }catch(e){console.warn("Supabase load failed:",e);alert("⚠ تعذر تحميل بيانات السحابة: "+(e.message||e));cloudMsg("⚠ تعذر تحميل بيانات السحابة",true)}
 }
@@ -285,7 +311,7 @@ async function cloudRefresh(){
     const{data,error}=await sb.from("app_data").select("data,updated_at").eq("owner_id",cloudUid).maybeSingle();
     if(error||!data||!data.data||!data.data.clients)return;
     if(cloudStamp&&Date.parse(data.updated_at)<=Date.parse(cloudStamp))return;
-    S=data.data;cloudStamp=data.updated_at;
+    S=data.data;cloudStamp=data.updated_at;lsSet(SKEY,cloudStamp);
     try{localStorage.setItem(KEY,JSON.stringify(S))}catch(e){}
     fixS();render();cloudMsg("✓ تم تحديث البيانات من جهاز آخر "+new Date().toLocaleTimeString("ar-EG"));
   }catch(e){console.warn("refresh failed",e)}
@@ -308,6 +334,7 @@ document.addEventListener("visibilitychange",()=>{if(document.visibilityState===
 window.addEventListener("focus",cloudRefresh);
 setInterval(()=>{if(document.visibilityState==="visible")cloudRefresh()},5000);
 async function init(){
+  if(SNAP){try{const l=localStorage.getItem(KEY);S=l?JSON.parse(l):JSON.parse(JSON.stringify(SNAP.data))}catch(e){S=JSON.parse(JSON.stringify(SNAP.data))}fixS();save();render();snapBanner();return}
   try{const l=localStorage.getItem(KEY);if(l)S=JSON.parse(l)}catch(e){}
   if(!S){try{const r=await fetch("data.json",{cache:"no-store"});if(r.ok)S=await r.json()}catch(e){}}
   if(!S)S=JSON.parse(JSON.stringify(SEED));
@@ -321,6 +348,7 @@ const collectedAmount=r=>paymentRows(r).filter(p=>String(p.subscription_id||"")=
 const supportCollections=()=>{const byClient=new Map();let egp=0,usd=0,unassignedEGP=0;S.support.forEach(r=>{const amount=collectedAmount(r),currency=r.currencySnapshot||r.currency;if(amount<=0||!CUR.includes(currency))return;currency==="ج.م"?egp+=amount:usd+=amount;let c=null;if(r.client_id&&r.store_id)c=S.clients.find(x=>String(x.id)===String(r.client_id)&&String(x.store_id)===String(r.store_id))||null;else if(!r.client_id&&!r.store_id&&norm(r.name)&&norm(r.store)){const matches=S.clients.filter(x=>norm(x.name)===norm(r.name)&&norm(x.brand)===norm(r.store));if(matches.length===1)c=matches[0]}if(c){const item=byClient.get(String(c.id))||{egp:0,usd:0};item[currency==="ج.م"?"egp":"usd"]+=amount;byClient.set(String(c.id),item)}else unassignedEGP+=amount*(currency==="دولار"?(num(S.settings.rate)||50):1)});return{byClient,egp,usd,unassignedEGP}};
 const egp=x=>x.cur==="دولار"?total(x)*(num(x.rate)||num(S.settings.rate)):total(x);
 const pdate=s=>{const raw=String(s||"").trim(),iso=/^(\d{4})-(\d{2})-(\d{2})$/.exec(raw);let p=iso?[Number(iso[3]),Number(iso[2]),Number(iso[1])]:raw.split(/[\/\.\-]/).map(Number);if(p.length<3||!p[0]||!p[1]||!p[2])return null;if(!iso&&p[2]<100)p[2]+=2000;const d=new Date(p[2],p[1]-1,p[0]);return d.getDate()===p[0]&&d.getMonth()+1===p[1]&&d.getFullYear()===p[2]?d:null};
+function sortProjects(){if(!S||!Array.isArray(S.projects))return;const key=p=>{for(const f of["start","down","fullDate","postDate","final"]){const d=pdate(p[f]);if(d)return+d}return Infinity};S.projects=S.projects.map((p,i)=>[p,i]).sort((a,b)=>{const x=key(a[0]),y=key(b[0]);return x===y?a[1]-b[1]:x<y?-1:1}).map(a=>a[0])}
 const datePickerValue=value=>{const d=pdate(value);return d?`${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,"0")}-${String(d.getDate()).padStart(2,"0")}`:""};
 const dateDisplayValue=value=>{const d=pdate(value);return d?`${String(d.getDate()).padStart(2,"0")}/${String(d.getMonth()+1).padStart(2,"0")}/${String(d.getFullYear()).slice(-2)}`:""};
 function enhanceDatePickers(root){if(!root)return;root.querySelectorAll('input:not([type]),input[type="text"],input[type="date"]').forEach(input=>{if(input.dataset.dateDisplay)return;const label=input.parentElement?.querySelector(":scope > label,:scope > .k")||input.closest("div")?.querySelector("label,.k"),text=String(label?.textContent||"");if(!/(تاريخ|بداية|نهاية)/.test(text))return;input.dataset.dateDisplay="1";input.type="text";input.inputMode="numeric";input.placeholder="dd/mm/yy";input.value=dateDisplayValue(input.value);const wrap=document.createElement("div");wrap.className="date-control";input.before(wrap);wrap.append(input);const picker=document.createElement("input");picker.type="date";picker.className="date-picker-native";picker.tabIndex=-1;picker.setAttribute("aria-hidden","true");picker.value=datePickerValue(input.value);const button=document.createElement("button");button.type="button";button.className="btn g date-picker-trigger";button.textContent="التقويم";button.setAttribute("aria-label","اختيار التاريخ من التقويم");button.onclick=()=>{try{picker.showPicker()}catch{picker.focus();picker.click()}};picker.onchange=()=>{input.value=dateDisplayValue(picker.value);input.dispatchEvent(new Event("input",{bubbles:true}));input.dispatchEvent(new Event("change",{bubbles:true}))};const validateDate=()=>{const iso=datePickerValue(input.value);input.setCustomValidity(input.value&&!iso?"أدخل التاريخ بصيغة dd/mm/yy أو اختره من التقويم":"");if(iso)picker.value=iso};input.addEventListener("input",validateDate);wrap.append(button,picker);validateDate()});root.onformdata=e=>root.querySelectorAll('input[data-date-display][name]').forEach(input=>{const d=pdate(input.value);e.formData.set(input.name,d?fd(d):"")})}
@@ -438,9 +466,10 @@ function dash(){
   ${a.sites.map(s=>`<tr><td>${esc(s.id)}</td><td>${esc(s.name)}</td><td>${esc(s.brand)}</td><td>${esc(s.service)}</td><td>${s.extra}</td><td>${s.services}</td><td>${fmt(s.first)}</td><td>${fmt(s.exAmt)}</td><td>${fmt(s.paid)}</td><td>${s.cur}</td><td>${fmt(s.paidE)}</td></tr>`).join("")}</table></div></div>
   <div class="card"><h2>${esc(nm("supAna"))}</h2>${S.support.length?`<p class="note">التحصيل المؤكد من سجل الدفعات فقط. المبالغ التاريخية قيد المراجعة معروضة منفصلة ولا تُعامل كمدفوعة أو مستحقة. المستحق المؤكد يستبعدها؛ هناك ${a.supReview} اشتراك يحتاج مراجعة.</p><p class="k">ملخص لكل عميل ومتجر</p><div class="wrap"><table><tr><th>العميل</th><th>الاشتراكات</th><th>الباقة الحالية</th><th>العملة</th><th>القيمة الشهرية</th><th>شهور الاشتراك</th><th>شهور التوقف</th><th>المحصل المؤكد</th><th>قيد المراجعة</th><th>المستحق المؤكد</th><th>الحالة</th></tr>${a.supPeople.map(o=>`<tr><td>${esc(o.name)}</td><td>${o.subs}</td><td>${esc(o.plan)}</td><td>${esc(currencyLabel(o.currency))}</td><td>${o.act?money(o.fee,o.currency):"—"}</td><td>${o.ms}</td><td>${o.ina?`<span class="tag t-warn">${o.ina}</span>`:"0"}</td><td>${money(o.paid,o.currency)}</td><td>${money(o.review||0,o.currency)}</td><td>${money(o.due||0,o.currency)}</td><td><span class="tag ${o.cls}">${o.lbl}</span></td></tr>`).join("")}<tr><td colspan="5"><b>الإجمالي</b></td><td><b>${a.supMs}</b></td><td><b>${a.supIna}</b></td><td><b>${money(a.supEGP,"ج.م")} / ${money(a.supUSD,"دولار")}</b></td><td><b>${money(a.supReviewEGP,"ج.م")} / ${money(a.supReviewUSD,"دولار")}</b></td><td><b>${money(a.supDueEGP,"ج.م")} / ${money(a.supDueUSD,"دولار")}</b></td><td></td></tr></table></div><p class="k" style="margin-top:14px">تفاصيل كل اشتراك</p><div class="wrap"><table><tr><th>الكود</th><th>العميل</th><th>المتجر</th><th>الباقة</th><th>شهري</th><th>بداية الاشتراك</th><th>الانتهاء</th><th>شهور الاشتراك</th><th>شهور التوقف</th><th>الإجمالي</th><th>المحصل المؤكد</th><th>قيد المراجعة</th><th>المستحق المؤكد</th><th>الحالة</th></tr>${S.support.map(r=>{const st=subStatus(r),tt=total(r);return`<tr><td>${esc(r.sid)}</td><td>${esc(r.name)}</td><td>${esc(r.store)}</td><td>${esc(r.plan)}</td><td>${money(r.feeSnapshot??r.fee,r.currencySnapshot||r.currency)}</td><td>${esc(r.subStart||"—")}</td><td>${esc(r.end)||(endOf(r)?fd(endOf(r)):"—")}</td><td>${monthsSub(r)}</td><td>${inaMonths(r)}</td><td>${money(tt,r.currency)}</td><td>${money(collectedAmount(r),r.currency)}</td><td>${money(legacyReviewAmount(r),r.currency)}</td><td>${money(confirmedDue(r),r.currency)}</td><td>${st[0]?`<span class="tag ${st[1]}">${st[0]}</span>`:"—"}</td></tr>`}).join("")}<tr><td colspan="9"><b>ج.م</b></td><td><b>${fmt(a.supTotEGP)}</b></td><td><b>${fmt(a.supEGP)}</b></td><td><b>${fmt(a.supReviewEGP)}</b></td><td><b>${fmt(a.supDueEGP)}</b></td><td></td></tr><tr><td colspan="9"><b>دولار</b></td><td><b>${fmt(a.supTotUSD)}</b></td><td><b>${fmt(a.supUSD)}</b></td><td><b>${fmt(a.supReviewUSD)}</b></td><td><b>${fmt(a.supDueUSD)}</b></td><td></td></tr></table></div>`:'<div class="empty">لا توجد اشتراكات دعم بعد</div>'}</div>
   <div class="card"><h2>${esc(nm("check"))}</h2><p class="note">مشاريع غير مطابقة للعملاء (الكود / الاسم / العملة): <span class="tag ${a.bad?"t-bad":"t-ok"}">${a.bad}</span> &nbsp; فرق الإجمالي مقابل جدول العملاء: <span class="tag ${a.diff?"t-bad":"t-ok"}">${a.diff}</span> &nbsp; سجلات بالدولار بدون سعر: <span class="tag ${a.noRate?"t-bad":"t-ok"}">${a.noRate}</span></p></div>
-  <div class="card"><h2>البيانات</h2><div class="tb" style="margin:0"><button class="btn g" data-m="xl">⬇ تصدير ملف إكسل</button><button class="btn g" data-m="js">⬇ تصدير ملف البيانات</button><button class="btn g" data-m="html">⬇ تصدير نسخة HTML</button><button class="btn g" data-m="im">⬆ استيراد ملف إكسل / بيانات</button><button class="btn g" data-m="rs">↺ إرجاع البيانات الأصلية</button></div></div>`;
+  <div class="card"><h2>البيانات</h2><div class="tb" style="margin:0"><button class="btn g" data-m="xl">⬇ تصدير ملف إكسل</button><button class="btn g" data-m="js">⬇ تصدير ملف البيانات</button><button class="btn g" data-m="html" title="السيستم كامل + بياناتك الحالية، يشتغل لوحده بدون Supabase">⬇ تصدير نسخة HTML كاملة (بالبيانات)</button><button class="btn g" data-m="htmlc" title="كود السيستم بس (بدون بيانات) — ده اللي ترفعه على GitHub">⬇ تصدير index.html (بدون بيانات)</button><button class="btn g" data-m="im">⬆ استيراد ملف إكسل / بيانات</button><button class="btn g" data-m="rs">↺ إرجاع البيانات الأصلية</button></div></div>`;
 }
 function cell(t,k,r){
+  if(k==="no")return String(S.projects.indexOf(r)+1);
   if(k==="total")return t==="support"?money(total(r),r.currency):fmt(total(r));
   if(t==="support"&&(k==="name"||k==="store")){const c=supportClient(r);if(c)return esc(k==="name"?c.name||c.id:c.brand||c.store_id)}
   if(k==="egp")return fmt(egp(r));
@@ -455,7 +484,7 @@ function cell(t,k,r){
 }
 const actionIcon=(name)=>{const paths={person:'<circle cx="12" cy="8" r="3.5"/><path d="M5 21v-1.5a7 7 0 0 1 14 0V21z"/>',renew:'<path d="M20 7v5h-5"/><path d="M4.5 11a7.5 7.5 0 0 1 13-4L20 9M4 17v-5h5"/><path d="M19.5 13a7.5 7.5 0 0 1-13 4L4 15"/>',play:'<path d="m8 5 11 7-11 7z"/>',pause:'<path d="M8 5v14M16 5v14"/>',edit:'<path d="m4 16.5-.8 4.3 4.3-.8L19 8.5 15.5 5z"/><path d="m13.8 6.7 3.5 3.5"/>',delete:'<path d="M4 7h16M10 11v6M14 11v6M5.5 7l1 14h11l1-14M9 7V4h6v3"/>',cancel:'<circle cx="12" cy="12" r="9"/><path d="m9 9 6 6m0-6-6 6"/>'};return `<svg class="action-icon" viewBox="0 0 24 24" aria-hidden="true">${paths[name]||""}</svg>`};
 function list(t){
-  const c=SC[t],cols=curCols(t),lb=k=>lab(t,k);const nf=1;
+  const c=SC[t],cols=curCols(t),lb=k=>lab(t,k);const nf=t==="projects"?2:1;
   const rows=S[t].map((r,i)=>[r,i]).filter(([r])=>!q||JSON.stringify(r).toLowerCase().includes(q.toLowerCase()));
   return (t==="support"?supportOverview()+plansCard()+(()=>{const pending=S.support.filter(r=>!S.clients.some(c=>String(c.id)===String(r.client_id)&&String(c.store_id)===String(r.store_id)));return pending.length?`<p class="note" style="color:var(--bad)">تحتاج ${pending.length} اشتراكات إلى مراجعة ربط يدوية: ${pending.map(r=>esc(r.sid||"بدون كود")).join("، ")}. لم يُخمن النظام ارتباطها.</p>`:""})():"")+`<div class="tb"><input id="q" placeholder="بحث…" value="${esc(q)}">${t==="support"?"":'<button class="btn" data-add="'+t+'">＋ إضافة</button>'}</div>
   <div class="card">${rows.length?`<div class="split"><div class="fzt"><table><tr>${cols.slice(0,nf).map(k=>`<th>${lb(k)}</th>`).join("")}</tr>${rows.map(([r])=>`<tr>${cols.slice(0,nf).map(k=>`<td>${cell(t,k,r)}</td>`).join("")}</tr>`).join("")}</table></div><div class="scr"><table><tr>${cols.slice(nf).map(k=>`<th>${lb(k)}</th>`).join("")}<th></th></tr>${rows.map(([r,i])=>`<tr>${cols.slice(nf).map(k=>`<td>${cell(t,k,r)}</td>`).join("")}<td>${t==="support"?`<button class="ic" data-prof="${t}:${i}" title="ملف الاشتراك">${actionIcon("person")}</button><button class="ic" data-renew="${i}" title="تفعيل تجديد الاشتراك">${actionIcon("renew")}</button>${r.stopped?`<button class="ic" data-resume="${i}" title="استئناف الدعم">${actionIcon("play")}</button>`:`<button class="ic" data-stop="${i}" title="إيقاف الدعم">${actionIcon("pause")}</button>`}`:t==="clients"?`<button class="ic" data-prof="${t}:${i}" title="ملف العميل الكامل">${actionIcon("person")}</button>`:""}<button class="ic" data-edit="${t}:${i}" title="تعديل">${actionIcon("edit")}</button><button class="ic" data-del="${t}:${i}" title="حذف">${actionIcon("delete")}</button></td></tr>`).join("")}</table></div></div>`:'<div class="empty">لا توجد سجلات — اضغط ＋ إضافة</div>'}</div>`;
@@ -468,7 +497,7 @@ function sets(){
 
  <div class="card"><h2>القوائم المنسدلة</h2><div class="f">${Object.entries(LN).map(([k,l])=>`<div><label>${l} — كل سطر اختيار</label><textarea rows="5" data-list="${k}">${esc((s.lists[k]||[]).join("\n"))}</textarea></div>`).join("")}</div></div>
  <div class="card"><h2>ترقيم الأكواد</h2><div class="f"><div><label>بادئة أكواد العملاء</label><input data-pre="clients" value="${esc(s.pre.clients)}"></div><div><label>بادئة أكواد الاشتراكات</label><input data-pre="support" value="${esc(s.pre.support)}"></div></div></div>
- <div class="card"><h2>البيانات</h2><div class="tb"><button class="btn g" data-m="xl">⬇ تصدير ملف إكسل</button><button class="btn g" data-m="js">⬇ تصدير ملف البيانات</button><button class="btn g" data-m="html">⬇ تصدير نسخة HTML</button><button class="btn g" data-m="im">⬆ استيراد ملف</button><button class="btn g" data-m="rs">↺ البيانات الأصلية</button><button class="btn" data-m="cl">🗑 مسح كل البيانات</button></div><p class="note">البيانات بتتحفظ في المتصفح تلقائيًا.</p></div>`}
+ <div class="card"><h2>البيانات</h2><div class="tb"><button class="btn g" data-m="xl">⬇ تصدير ملف إكسل</button><button class="btn g" data-m="js">⬇ تصدير ملف البيانات</button><button class="btn g" data-m="html" title="السيستم كامل + بياناتك الحالية، يشتغل لوحده بدون Supabase">⬇ تصدير نسخة HTML كاملة (بالبيانات)</button><button class="btn g" data-m="htmlc" title="كود السيستم بس (بدون بيانات) — ده اللي ترفعه على GitHub">⬇ تصدير index.html (بدون بيانات)</button><button class="btn g" data-m="im">⬆ استيراد ملف</button><button class="btn g" data-m="rs">↺ البيانات الأصلية</button><button class="btn" data-m="cl">🗑 مسح كل البيانات</button></div><p class="note">البيانات بتتحفظ في المتصفح تلقائيًا.</p></div>`}
 /* ---------- النماذج ---------- */
 function openForm(t,i){
   const c=SC[t],isNew=i==null,r=isNew?{}:S[t][i];
@@ -514,7 +543,7 @@ function openForm(t,i){
     if(!String(o.end||"").trim()){const s0=pdate(o.subStart);o.end=fd(addMonths(s0||new Date(),1))}
     }
    if(t==="clients"||t==="projects"){const paymentCheck=validateClientProjectPayments(t,o,S.settings.lists.paymentMethod||[]);if(!paymentCheck.ok){alert(paymentCheck.error);delete $frm.dataset.busy;return}}
-   isNew?S[t].push(o):S[t][i]=o;save();$dlg.close();render()};
+   isNew?S[t].push(o):S[t][i]=o;if(t==="projects")sortProjects();save();$dlg.close();render()};
   delete $frm.dataset.busy;$("#cx").onclick=()=>$dlg.close();$dlg.showModal();
 }
 /* ---------- الباقات والملفات ---------- */
@@ -570,14 +599,17 @@ function exportXlsx(){
   Object.entries(SC).forEach(([t,c])=>{const rows=S[t].map(r=>Object.fromEntries(c.f.map(([k,l])=>[l,r[k]??""])));XLSX.utils.book_append_sheet(w,XLSX.utils.json_to_sheet(rows,{header:c.f.map(x=>x[1])}),c.sheet)});
   XLSX.writeFile(w,"Work System.xlsx");
 }
-function exportHtml(){
- const a=A(),d=new Date(),ds=d.getDate()+"/"+(d.getMonth()+1)+"/"+d.getFullYear();
- const cols=t=>[...SC[t].f.map(x=>x[0]),"total",...(t!=="support"?["egp","dstatus"]:[])];
- const val=(t,k,r)=>k==="total"?fmt(total(r)):k==="egp"?fmt(egp(r)):k==="dstatus"?(String(r.end??"").trim()?"مكتملة":"غير مكتملة"):(r[k]??"");
- const tbl=t=>{const ks=cols(t);return`<h2>${esc(nm(t))} (${S[t].length})</h2><div class="wrap"><table><tr>${ks.map(k=>`<th>${esc(lab(t,k))}</th>`).join("")}</tr>${S[t].map(r=>`<tr>${ks.map(k=>`<td>${esc(val(t,k,r))}</td>`).join("")}</tr>`).join("")}</table></div>`};
- const cards=[["إجمالي الدخل (ج.م)",fmt(a.e.all)],["المواقع المنفذة",S.clients.length],["مشاريع إضافية",S.projects.length],["اشتراكات الدعم",S.support.length],["المحصل من الدعم (ج.م)",fmt(a.sup)]];
- const h=`<!DOCTYPE html><html lang="ar" dir="rtl"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>${esc(S.settings.title)} — نسخة ${ds}</title><style>body{margin:0;padding:24px;font-family:Almarai,"Segoe UI",Tahoma,system-ui,sans-serif;background:#0a0405;color:#f6eef0}h1{font-size:20px}h2{font-size:17px;margin:28px 0 10px}.g{display:grid;gap:12px;grid-template-columns:repeat(auto-fit,minmax(160px,1fr))}.c{background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.1);border-radius:14px;padding:14px}.c b{display:block;font-size:22px;margin-top:4px}.k{color:#b9a6aa;font-size:13px}.wrap{overflow-x:auto}table{width:100%;border-collapse:collapse;font-size:13px;white-space:nowrap}th{color:#b9a6aa;text-align:start;padding:8px;border-bottom:1px solid rgba(255,255,255,.15)}td{padding:8px;border-bottom:1px solid rgba(255,255,255,.06)}</style></head><body><h1>${esc(S.settings.title)} — نسخة بتاريخ ${ds}</h1><div class="g">${cards.map(([k,v])=>`<div class="c"><span class="k">${k}</span><b>${v}</b></div>`).join("")}</div>${tbl("clients")}${tbl("projects")}${tbl("support")}</body></html>`;
- dl("index.html",new Blob([h],{type:"text/html"}));
+async function exportHtml(withData){
+  let src=null;
+  try{const u=location.href.split("#")[0].split("?")[0];const r=await fetch(u,{cache:"no-store"});if(r.ok)src=await r.text()}catch(e){}
+  if(!src||!/<\/html>\s*$/i.test(src.trim())||!/<head[^>]*>/i.test(src)){alert("تعذر قراءة ملف السيستم الأصلي.\nافتح السيستم من الرابط (GitHub Pages) مش من ملف على الجهاز، وجرّب تاني.");return}
+  src=src.replace(/<!--SNAP-START-->[\s\S]*?<!--SNAP-END-->\n?/,"");
+  const d=new Date(),day=d.toISOString().slice(0,10);
+  if(!withData){dl("index.html",new Blob([src],{type:"text/html"}));return}
+  const at=day+" "+d.toTimeString().slice(0,5);
+  const j=JSON.stringify({at,data:S}).replace(/</g,"\\u003c").replace(/\u2028/g,"\\u2028").replace(/\u2029/g,"\\u2029");
+  src=src.replace(/<head[^>]*>/i,m=>m+"\n<!--SNAP-START--><script>window.__SNAPSHOT__="+j+";<\/script><!--SNAP-END-->");
+  dl("Work System - snapshot "+day+".html",new Blob([src],{type:"text/html"}));
 }
 function fd(v){if(v instanceof Date)return v.getDate()+"/"+(v.getMonth()+1)+"/"+v.getFullYear();return v==null||v==="-"?"":String(v)}
 function importFile(f){
@@ -614,7 +646,7 @@ document.addEventListener("click",e=>{
   else if(t.dataset.edit){const[a,b]=t.dataset.edit.split(":");openForm(a,+b)}
   else if(t.dataset.del){const[a,b]=t.dataset.del.split(":");if(confirm("حذف السجل ده؟")){S[a].splice(+b,1);save();render()}}
   else if(t.dataset.m){const m=t.dataset.m;
-    if(m==="xl")exportXlsx();else if(m==="html")exportHtml();else if(m==="js")dl("Work System.json",new Blob([JSON.stringify(S,null,1)],{type:"application/json"}));
+    if(m==="xl")exportXlsx();else if(m==="html")exportHtml(true);else if(m==="htmlc")exportHtml(false);else if(m==="js")dl("Work System.json",new Blob([JSON.stringify(S,null,1)],{type:"application/json"}));
     else if(m==="im")$file.click();else if(m==="logo")$("#logof").click();else if(m==="logo0"){S.settings.logo="";save();theme()}else if(m==="cl"){if(confirm("هيتم مسح كل العملاء والمشاريع والاشتراكات. متأكد؟")){S.clients=[];S.projects=[];S.support=[];save();render()}}
     else if(m==="rs"&&confirm("هيتم مسح بياناتك الحالية والرجوع للبيانات الأصلية. متأكد؟")){S=JSON.parse(JSON.stringify(SEED));save();render()}}
 });
@@ -636,10 +668,10 @@ function gateFail(msg){
   const gc=$gate.querySelector(".gcard");gc.classList.remove("shake");void gc.offsetWidth;gc.classList.add("shake");
 }
 function unlock(email){
-  try{localStorage.setItem("wk_last",JSON.stringify({id:cloudUid,email}))}catch(e){}
+  if(!SNAP)try{localStorage.setItem("wk_last",JSON.stringify({id:cloudUid,email}))}catch(e){}
   $gate.classList.add("off");document.body.classList.remove("locked");
   setTimeout(()=>$gate.remove(),450);
-  if($out){$out.hidden=false;$out.title="تسجيل الخروج ("+email+")"}
+  if($out&&!SNAP){$out.hidden=false;$out.title="تسجيل الخروج ("+email+")"}
   init();
 }
 async function tryUnlock(){
@@ -662,6 +694,7 @@ $("#gform").onsubmit=e=>{e.preventDefault();tryUnlock()};
 if($out)$out.onclick=async()=>{try{localStorage.removeItem("wk_last")}catch(e){}try{if(sb)await sb.auth.signOut({scope:"local"})}catch(e){}location.reload()};
 /* عند الفتح: جلسة محفوظة؟ فتح تلقائي — وإلا بطاقة الدخول */
 (async()=>{
+  if(SNAP){unlock("نسخة محفوظة");return}
   const cached=()=>{try{const lu=JSON.parse(localStorage.getItem("wk_last")||"null");if(lu&&lu.id){cloudUid=lu.id;cloudEmail=lu.email||"";unlock(cloudEmail);return true}}catch(e){}return false};
   if(sb){
     try{
